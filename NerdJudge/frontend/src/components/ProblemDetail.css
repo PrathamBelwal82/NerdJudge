@@ -1,0 +1,65 @@
+.problem-detail-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .problem-title {
+    font-size: 2em;
+    margin-bottom: 10px;
+  }
+  
+  .problem-description {
+    margin-bottom: 20px;
+  }
+  
+  .form-container {
+    margin-bottom: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .submit-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .message {
+    color: #dc3545;
+  }
+  
+  .output-container {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+  }
+  
+  .editor-container {
+    margin-bottom: 20px;
+  }
+  
+  .run-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .run-button:hover {
+    background-color: #218838;
+  }
+  

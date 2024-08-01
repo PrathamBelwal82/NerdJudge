@@ -1,0 +1,56 @@
+.problems-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #000; /* Black background */
+    color: #fff; /* White text color */
+    font-family: Arial, sans-serif;
+  }
+  
+  .problems-title {
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .problems-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .problems-table th, .problems-table td {
+    padding: 12px;
+    border: 1px solid #333;
+    text-align: left;
+  }
+  
+  .problems-table th {
+    background-color: #222;
+    color: #fff;
+  }
+  
+  .problems-table tr:nth-child(even) {
+    background-color: #111;
+  }
+  
+  .problems-table tr:hover {
+    background-color: #333;
+  }
+  
+  .problem-link {
+    color: #1e90ff;
+    text-decoration: none;
+  }
+  
+  .problem-link:hover {
+    text-decoration: underline;
+  }
+  
+  .loading {
+    text-align: center;
+    font-size: 1.2em;
+    color: #1e90ff;
+    margin-top: 50px;
+  }
+  
