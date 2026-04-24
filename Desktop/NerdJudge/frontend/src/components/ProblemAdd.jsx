@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box, IconButton, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { API_BASE_URL } from '../api';
 
 const ProblemAdd = () => {
     const [title, setTitle] = useState('');
@@ -52,7 +53,7 @@ const ProblemAdd = () => {
         };
 
         try {
-            const response = await fetch('https://backend.nerdjudge.me/problems/add', {
+            const response = await fetch(`${API_BASE_URL}/problems/add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

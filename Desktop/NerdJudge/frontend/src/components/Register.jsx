@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, TextField, Container, Box, Typography } from '@mui/material'; // Assuming you are using Material-UI for UI components
 import { useAuth } from '../components/AuthContext';
+import { API_BASE_URL } from '../api';
 
 const Register = () => {
     const [firstName, setFirstName] = useState('');
@@ -22,7 +23,7 @@ const Register = () => {
         }
 
         try {
-            const response = await fetch('https://backend.nerdjudge.me/register', {
+            const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,1 +1,6 @@
 keys/
+backend/.env
+frontend/.env
+.env
+.env.local
+node_modules/

@@ -4,8 +4,13 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/Users');
 const { storeTokenInCookie } = require('../middleware/cookie');
+const mockStore = require('../mock/store');
 
 exports.login = async (req, res) => {
+  if (mockStore.USE()) {
+    return mockStore.login(req, res);
+  }
+
   const { email, password } = req.body;
 
   try {
@@ -22,12 +27,9 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.SECRET_KEY, { expiresIn: '15d' });
-    console.log('Generated JWT Token:', token);
 
     storeTokenInCookie(token, res);
-    res.status(200).json(
-      token
-    );
+    res.status(200).json({ token, userId: user._id.toString() });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: 'Server error' });
@@ -35,11 +37,13 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { firstName, lastName, email, password, confirmPassword } = req.body;
+  if (mockStore.USE()) {
+    return mockStore.register(req, res);
+  }
+
+  const { firstName, lastName, email, password } = req.body;
 
   try {
-    
-
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -58,11 +62,7 @@ exports.register = async (req, res) => {
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.SECRET_KEY, { expiresIn: '15d' });
 
     storeTokenInCookie(token, res);
-    res.status(200).json(
-      token
-    );
-
-    
+    res.status(200).json({ token, userId: user._id.toString() });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../api';
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress } from '@mui/material';
 
 const Leaderboard = () => {
@@ -9,7 +10,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await axios.get('https://backend.nerdjudge.me/leaderboard');
+        const response = await axios.get(`${API_BASE_URL}/leaderboard`);
         setLeaderboard(response.data);
       } catch (error) {
         console.error('Error fetching leaderboard:', error.response ? error.response.data : error.message);
@@ -40,16 +41,18 @@ const Leaderboard = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Rank</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Total Submissions</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Problems solved</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {leaderboard.map((user, index) => (
-                <TableRow key={user.userId}>
+              {leaderboard.map((row, index) => (
+                <TableRow key={row._id}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.totalSubmissions}</TableCell>
+                  <TableCell>
+                    {row.firstName} {row.lastName}
+                  </TableCell>
+                  <TableCell>{row.problemsSolved}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -1,0 +1,15 @@
+# Optional: real persistent local MongoDB (needs Docker Desktop)
+# From repo root: docker compose up -d
+# Then in backend/.env set: MONGODB_URI=mongodb://127.0.0.1:27017/nerdjudge
+# And run: npm run start:atlas
+services:
+  mongo:
+    image: mongo:7
+    container_name: nerdjudge-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - nerdjudge_mongo_data:/data/db
+
+volumes:
+  nerdjudge_mongo_data:

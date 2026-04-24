@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Button, Typography, Box, Paper, CircularProgress, Alert } from '@mui/material';
+import { API_BASE_URL } from '../api';
+import { AppBar, Toolbar, Container, Button, Typography, Box, Paper, CircularProgress, Alert } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 const Home = () => {
@@ -12,7 +14,7 @@ const Home = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await axios.get('https://backend.nerdjudge.me/leaderboard');
+        const response = await axios.get(`${API_BASE_URL}/leaderboard`);
         setLeaderboard(response.data);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
@@ -28,10 +30,10 @@ const Home = () => {
   const handleSubmission = async () => {
     try {
       // Submit code here
-      const response = await axios.post('https://backend.nerdjudge.me/submit', { /* submission data */ });
+      const response = await axios.post(`${API_BASE_URL}/submit`, { /* submission data */ });
       if (response.data.verdict === 'All test cases passed') {
         // Fetch updated leaderboard after successful submission
-        const updatedResponse = await axios.get('https://backend.nerdjudge.me/leaderboard');
+        const updatedResponse = await axios.get(`${API_BASE_URL}/leaderboard`);
         setLeaderboard(updatedResponse.data);
       }
     } catch (error) {

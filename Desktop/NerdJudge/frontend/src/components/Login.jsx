@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, TextField, Container, Box, Typography } from '@mui/material'; // Assuming you are using Material-UI for UI components
+import { useNavigate, Link } from 'react-router-dom';
+import { Button, TextField, Container, Box, Typography } from '@mui/material';
 import { useAuth } from '../components/AuthContext';
+import { API_BASE_URL } from '../api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,32 +13,44 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    const normalizedEmail = email.trim().toLowerCase();
 
     try {
-      const response = await fetch('https://backend.nerdjudge.me/login', {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        setError('Invalid response from server. Is the API running?');
+        return;
+      }
 
       if (response.ok) {
-        // Login successful, redirect to home or dashboard
         login(data);
         navigate('/');
-      } else if (data.register) {
-        // User does not exist, redirect to register page
-        navigate('/register');
-      } else {
-        // Invalid credentials or other error
-        setError(data.message);
+        return;
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError('Server error');
+
+      if (data.register) {
+        setError(
+          'No account exists for this email. Create one below, or use demo login if the server is in demo mode (demo@nerdjudge.local / demo123).'
+        );
+        return;
+      }
+
+      setError(data.message || 'Login failed');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Cannot reach server. Check that the backend is running and VITE_API_BASE_URL is correct.');
     }
   };
 
@@ -46,6 +59,9 @@ const Login = () => {
       <Box sx={{ width: '100%', maxWidth: '400px', padding: 4, border: '1px solid #ddd', borderRadius: '8px' }}>
         <Typography variant="h5" gutterBottom>
           Login
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          
         </Typography>
         <form onSubmit={handleSubmit}>
           <TextField
@@ -69,7 +85,14 @@ const Login = () => {
           <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
             Login
           </Button>
-          {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
+          {error && (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
+          <Button component={Link} to="/register" fullWidth sx={{ mt: 2 }}>
+            Go to Register
+          </Button>
         </form>
       </Box>
     </Container>

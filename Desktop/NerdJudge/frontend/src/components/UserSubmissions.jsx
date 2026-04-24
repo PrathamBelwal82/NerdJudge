@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../api';
 import { useAuth } from './AuthContext';
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
@@ -19,7 +20,7 @@ const UserSubmissions = () => {
       }
 
       try {
-        const response = await axios.get('https://backend.nerdjudge.me/submissions/usersubmissions', {
+        const response = await axios.get(`${API_BASE_URL}/submissions/usersubmissions`, {
           headers: { Authorization: `Bearer ${user.token}` },
           withCredentials: true,
         });

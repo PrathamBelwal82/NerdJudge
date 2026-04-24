@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Typography, Button, CircularProgress } from '@mui/material';
+import { API_BASE_URL } from '../api';
 
 function FileUpload({ userId, problemId }) {
     const [file, setFile] = useState(null);
@@ -22,7 +23,7 @@ function FileUpload({ userId, problemId }) {
         formData.append('problemId', problemId);
 
         try {
-            const response = await fetch('https://backend.nerdjudge.me/submissions/upload', {
+            const response = await fetch(`${API_BASE_URL}/submissions/upload`, {
                 method: 'POST',
                 body: formData,
             });

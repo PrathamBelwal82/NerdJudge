@@ -10,6 +10,7 @@ const { executeCpp } = require('./executeCpp');
 const { generateInputFile } = require('./generateInputFile');
 const fs = require('fs');
 const Leaderboard = require('../models/Leaderboard');
+const mockStore = require('../mock/store');
 
 const updateLeaderboard = async (userId) => {
   try {
@@ -29,18 +30,14 @@ const updateLeaderboard = async (userId) => {
       await newEntry.save();
     }
 
-    // Sort leaderboard and keep top 10
     const topUsers = await Leaderboard.find().sort({ problemsSolved: -1 }).limit(10);
-    await Leaderboard.deleteMany({}); // Clear previous leaderboard entries
-    await Leaderboard.insertMany(topUsers); // Insert updated leaderboard
-
+    await Leaderboard.deleteMany({});
+    await Leaderboard.insertMany(topUsers);
   } catch (error) {
     console.error('Error updating leaderboard:', error);
   }
 };
 
-
-// Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
@@ -53,8 +50,65 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post('/submit', verifyToken, upload.single('file'), async (req, res) => {
+  if (mockStore.USE()) {
+    try {
+      const { problemId, code, language } = req.body;
+      const userId = req.user.id;
+
+      if (req.file) {
+        mockStore.addSubmission({
+          _id: mockStore.newId(),
+          userId,
+          problemId,
+          filePath: req.file.path,
+          submittedAt: new Date(),
+        });
+      }
+
+      if (code) {
+        const problem = mockStore.getProblemById(problemId);
+        if (!problem) {
+          return res.status(404).json({ message: 'Problem not found' });
+        }
+
+        const testCases = problem.testCases || [];
+        const codeFilePath = await generateFile(language, code);
+
+        const verdict = await Promise.all(
+          testCases.map(async ({ input: testInput, output: expectedOutput }) => {
+            const testInputFilePath = await generateInputFile(testInput);
+            const testOutput = await executeCpp(language, codeFilePath, testInputFilePath);
+            return testOutput.trim() === expectedOutput.trim();
+          })
+        );
+
+        const allPassed = verdict.every((v) => v);
+
+        if (allPassed) {
+          mockStore.recordSolvedProblem(userId, problemId);
+          return res.json({
+            verdict: 'All test cases passed',
+            message: 'Submission successful',
+          });
+        }
+        return res.json({
+          verdict: 'Some test cases failed',
+          message: 'Submission successful but not added to leaderboard',
+        });
+      }
+
+      return res.status(400).json({ message: 'No code provided' });
+    } catch (error) {
+      console.error('Error submitting:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Failed to submit', error: error.message });
+      }
+    }
+    return;
+  }
+
   try {
-    const { problemId, code, input, language } = req.body;
+    const { problemId, code, language } = req.body;
     const userId = req.user.id;
     let filePath;
 
@@ -76,33 +130,32 @@ router.post('/submit', verifyToken, upload.single('file'), async (req, res) => {
 
       const testCases = problem.testCases || [];
       const codeFilePath = await generateFile(language, code);
-      
-      const verdict = await Promise.all(testCases.map(async ({ input: testInput, output: expectedOutput }) => {
-        const testInputFilePath = await generateInputFile(testInput);
-        const testOutput = await executeCpp(language, codeFilePath, testInputFilePath);
-        return testOutput.trim() === expectedOutput.trim();
-      }));
 
-      const allPassed = verdict.every(v => v);
+      const verdict = await Promise.all(
+        testCases.map(async ({ input: testInput, output: expectedOutput }) => {
+          const testInputFilePath = await generateInputFile(testInput);
+          const testOutput = await executeCpp(language, codeFilePath, testInputFilePath);
+          return testOutput.trim() === expectedOutput.trim();
+        })
+      );
+
+      const allPassed = verdict.every((v) => v);
 
       if (allPassed) {
-        // Update the leaderboard
         await updateLeaderboard(userId);
 
         return res.json({
           verdict: 'All test cases passed',
           message: 'Submission successful',
         });
-      } else {
-        return res.json({
-          verdict: 'Some test cases failed',
-          message: 'Submission successful but not added to leaderboard',
-        });
       }
+      return res.json({
+        verdict: 'Some test cases failed',
+        message: 'Submission successful but not added to leaderboard',
+      });
     }
 
     return res.status(400).json({ message: 'No code provided' });
-
   } catch (error) {
     console.error('Error submitting:', error);
     if (!res.headersSent) {
@@ -111,10 +164,17 @@ router.post('/submit', verifyToken, upload.single('file'), async (req, res) => {
   }
 });
 
-
-
-
 router.get('/usersubmissions', verifyToken, async (req, res) => {
+  if (mockStore.USE()) {
+    try {
+      const rows = mockStore.listSubmissionsForUser(req.user.id);
+      return res.status(200).json(rows);
+    } catch (error) {
+      console.error('Server error:', error);
+      return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  }
+
   try {
     const submissions = await Submission.find({ userId: req.user.id });
     res.status(200).json(submissions);
@@ -125,6 +185,27 @@ router.get('/usersubmissions', verifyToken, async (req, res) => {
 });
 
 router.get('/file/:id', async (req, res) => {
+  if (mockStore.USE()) {
+    try {
+      const submission = mockStore.getSubmissionById(req.params.id);
+      if (!submission) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+      const diskPath = path.resolve(__dirname, '..', submission.filePath);
+      if (submission.filePath.startsWith('virtual/') || !fs.existsSync(diskPath)) {
+        return res.json({ content: mockStore.mockFileContent() });
+      }
+      return fs.readFile(diskPath, 'utf8', (err, data) => {
+        if (err) {
+          return res.status(500).json({ message: 'Error reading file' });
+        }
+        res.json({ content: data });
+      });
+    } catch (error) {
+      return res.status(500).json({ message: 'Server error' });
+    }
+  }
+
   try {
     const submission = await Submission.findById(req.params.id);
     if (!submission) {
@@ -150,6 +231,5 @@ router.get('/file/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 module.exports = router;

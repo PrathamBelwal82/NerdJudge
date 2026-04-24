@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../api';
 import { Container, Typography, Paper } from '@mui/material';
 
 const SubmissionDetail = () => {
@@ -11,7 +12,7 @@ const SubmissionDetail = () => {
   useEffect(() => {
     const fetchFileContent = async () => {
       try {
-        const response = await axios.get(`https://backend.nerdjudge.me/submissions/file/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/submissions/file/${id}`);
         setContent(response.data.content);
       } catch (error) {
         console.error('Error fetching file content:', error);

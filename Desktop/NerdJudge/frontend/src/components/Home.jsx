@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { AppBar, Toolbar, Typography, Button, Container, Box, Paper, CircularProgress, Alert } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../api';
 
 const Home = () => {
   const { user, logout } = useAuth();
@@ -13,7 +14,7 @@ const Home = () => {
   // Function to fetch leaderboard data
   const fetchLeaderboard = async () => {
     try {
-      const response = await axios.get('https://backend.nerdjudge.me/leaderboard');
+      const response = await axios.get(`${API_BASE_URL}/leaderboard`);
       setLeaderboard(response.data);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);

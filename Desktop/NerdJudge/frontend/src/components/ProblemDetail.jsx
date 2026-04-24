@@ -10,6 +10,7 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-c';
 import 'prismjs/themes/prism.css';
 import { useAuth } from './AuthContext';
+import { API_BASE_URL } from '../api';
 import './ProblemDetail.css'; // Import your custom CSS file
 
 function ProblemDetail() {
@@ -27,7 +28,7 @@ function ProblemDetail() {
   useEffect(() => {
     const fetchProblemDetails = async () => {
       try {
-        const response = await axios.get(`https://backend.nerdjudge.me/problems/${id}`);
+        const response = await axios.get(`${API_BASE_URL}/problems/${id}`);
         setProblem(response.data);
       } catch (error) {
         console.error('Error fetching problem details:', error);
@@ -51,7 +52,7 @@ function ProblemDetail() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('userId', user.id);
+    formData.append('userId', user.userId || user.id);
     formData.append('problemId', id);
     formData.append('code', codeContent);
     formData.append('input', inputContent);
@@ -62,7 +63,7 @@ function ProblemDetail() {
     }
 
     try {
-      const response = await axios.post('https://backend.nerdjudge.me/submissions/submit', formData, {
+      const response = await axios.post(`${API_BASE_URL}/submissions/submit`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${user.token}`
@@ -91,7 +92,7 @@ function ProblemDetail() {
     };
 
     try {
-      const { data } = await axios.post('https://backend.nerdjudge.me/execute/run', payload);
+      const { data } = await axios.post(`${API_BASE_URL}/execute/run`, payload);
       setOutput(data.output);
     } catch (error) {
       console.log('Error executing code:', error.response);

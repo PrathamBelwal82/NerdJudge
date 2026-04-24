@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Grid, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, MenuItem, Button, CircularProgress } from '@mui/material'; // Material-UI components
 import { Pagination } from '@mui/material'; // For pagination
 import axios from 'axios';
+import { API_BASE_URL } from '../api';
 
 const Problems = () => {
   const [problems, setProblems] = useState([]);
@@ -19,7 +20,7 @@ const Problems = () => {
     const fetchProblems = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://backend.nerdjudge.me/problems', {
+        const response = await axios.get(`${API_BASE_URL}/problems`, {
           params: {
             page,
             limit: 10,
